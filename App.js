@@ -4,7 +4,7 @@ Ext.define('CustomApp', {
 
     items: [
         {
-        	html: "List Fields - Version Sandbox"
+            html: "List Custom Fields - Version 2.0.1"
         },
         {
             xtype: 'component',
@@ -47,6 +47,51 @@ Ext.define('CustomApp', {
                 property: 'ElementName',
                 operator: '=',
                 value: 'PortfolioItem'
+            },
+            {
+                property: 'ElementName',
+                operator: '=',
+                value: 'Workspace'
+            },
+            {
+                property: 'ElementName',
+                operator: '=',
+                value: 'User'
+            },
+            {
+                property: 'ElementName',
+                operator: '=',
+                value: 'DefectSuite'
+            },
+            {
+                property: 'ElementName',
+                operator: '=',
+                value: 'Iteration'
+            },
+            {
+                property: 'ElementName',
+                operator: '=',
+                value: 'Milestone'
+            },
+            {
+                property: 'ElementName',
+                operator: '=',
+                value: 'Project'
+            },
+            {
+                property: 'ElementName',
+                operator: '=',
+                value: 'Release'
+            },
+            {
+                property: 'ElementName',
+                operator: '=',
+                value: 'TestCaseResult'
+            },
+            {
+                property: 'ElementName',
+                operator: '=',
+                value: 'TestSet'
             }
         ]);
 
@@ -86,7 +131,7 @@ Ext.define('CustomApp', {
         var fieldsArray = [];
 
         attributes.load({
-            fetch: ['ElementName', 'AttributeType'],
+            fetch: ['ElementName', 'AttributeType', 'MaxLength', 'Hidden', 'Project'],
             filters: [{
                 property: 'Custom',
                 value: true
@@ -106,6 +151,8 @@ Ext.define('CustomApp', {
                 return Deft.Promise.when({
                     name: field.get('ElementName'),
                     type: field.get('AttributeType'),
+                    fieldLength: field.get('MaxLength'),
+                    fieldHidden: field.get('Hidden'),
                     allowedvalues: 'n/a'
                 });
             } else {
@@ -120,6 +167,8 @@ Ext.define('CustomApp', {
                         return {
                             name: field.get('ElementName'),
                             type: field.get('AttributeType'),
+                            fieldLength: field.get('MaxLength'),
+                            fieldHidden: field.get('Hidden'),
                             allowedvalues: _.map(nonEmptyValues, function (val) {
                                 return val.get('StringValue');
                             }).join(',')
@@ -129,7 +178,11 @@ Ext.define('CustomApp', {
                 });
             }
         }, this);
-
+console.log(fields);
+        if (fields.length === 0) {
+            Ext.ComponentQuery.query('#notifier')[0].update('NO custom fields found for ' + Ext.ComponentQuery.query('#typeDefCombobox')[0].rawValue);
+            Ext.ComponentQuery.query('#gridContainer')[0].remove(Ext.ComponentQuery.query('#attributeGrid')[0], true);
+        }
         return Deft.Promise.all(promises);
     },
 
@@ -137,15 +190,13 @@ Ext.define('CustomApp', {
         if (this.down('rallygrid')) {
             Ext.ComponentQuery.query('#gridContainer')[0].remove(Ext.ComponentQuery.query('#attributeGrid')[0], true);
         }
-        console.log("makegrid fields", fields);
         var count = fields.length;
         if (count > 0) {
-            Ext.ComponentQuery.query('#notifier')[0].update(count + ' custom fields found');
+            Ext.ComponentQuery.query('#notifier')[0].update(count + ' custom field(s) found for ' + Ext.ComponentQuery.query('#typeDefCombobox')[0].rawValue);
             var store = Ext.create('Rally.data.custom.Store', {
-                fields: ['name', 'type', 'allowedvalues'],
+                fields: ['name', 'type', 'allowedvalues', 'fieldLength', 'fieldHidden'],
                 data: fields
             });
-            console.log("store:", store);
 
             this.down('#gridContainer').add({
                 xtype: 'rallygrid',
@@ -153,15 +204,18 @@ Ext.define('CustomApp', {
                 store: store,
                 enableEditing: false,
                 showRowActionsColumn: false,
-                width: 700,
                 columnCfgs: [
                     {text: 'Name', dataIndex: 'name', flex: 1},
                     {text: 'Type', dataIndex: 'type'},
+                    {text: 'Max Length', dataIndex: 'fieldLength'},
+                    {text: 'Hidden', dataIndex: 'fieldHidden'},
                     {text: 'Allowed Values', dataIndex: 'allowedvalues', flex: 1}
+                    
                 ]
             });
         } else {
-            Ext.ComponentQuery.query('#notifier')[0].update('no custom fields found');
+            Ext.ComponentQuery.query('#notifier')[0].update('NO custom fields found');
+            Ext.ComponentQuery.query('#gridContainer')[0].remove(Ext.ComponentQuery.query('#attributeGrid')[0], true);
         }
     }
 });
