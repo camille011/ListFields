@@ -178,7 +178,6 @@ Ext.define('CustomApp', {
                 });
             }
         }, this);
-console.log(fields);
         if (fields.length === 0) {
             Ext.ComponentQuery.query('#notifier')[0].update('NO custom fields found for ' + Ext.ComponentQuery.query('#typeDefCombobox')[0].rawValue);
             Ext.ComponentQuery.query('#gridContainer')[0].remove(Ext.ComponentQuery.query('#attributeGrid')[0], true);
